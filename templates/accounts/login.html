@@ -1,12 +1,18 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 
 {% block title %}ورود به پرتال{% endblock %}
 
 {% block extra_style %}
-body { background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #f0fdf4 100%); }
+body {
+    background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-.login-wrapper {
+.login-outer {
+    width: 100%;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -14,140 +20,234 @@ body { background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #f0fdf4 100%
     padding: 2rem 1rem;
 }
 
-.login-box {
+.login-container {
+    display: flex;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(59,91,219,.15);
     width: 100%;
-    max-width: 420px;
-}
-
-.login-card {
+    max-width: 860px;
     background: #fff;
-    border-radius: 20px;
-    border: 1px solid var(--pastel-border);
-    box-shadow: 0 20px 60px rgba(124,158,248,.12);
-    padding: 2.5rem 2rem;
 }
 
-.login-logo {
-    width: 64px; height: 64px;
-    background: linear-gradient(135deg, var(--pastel-primary), var(--pastel-purple));
-    border-radius: 18px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.75rem;
+.login-left {
+    flex: 1;
+    background: linear-gradient(145deg, #1e2a4a 0%, #3b5bdb 100%);
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     color: #fff;
-    margin: 0 auto 1.25rem;
-    box-shadow: 0 8px 20px rgba(124,158,248,.35);
+    min-height: 500px;
 }
 
-.login-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--pastel-text);
-    margin-bottom: .25rem;
+.login-left .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 3rem;
 }
 
-.login-subtitle {
-    font-size: .875rem;
-    color: var(--pastel-muted);
+.login-left .logo-box {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    backdrop-filter: blur(8px);
+}
+
+.login-left .logo-text .t1 { font-size: 1rem; font-weight: 700; }
+.login-left .logo-text .t2 { font-size: .75rem; opacity: .65; }
+
+.login-left h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.4;
+    margin-bottom: .75rem;
+}
+
+.login-left p {
+    font-size: .85rem;
+    opacity: .75;
+    line-height: 1.7;
+}
+
+.login-features {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.login-feature-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .8rem;
+    opacity: .85;
+}
+
+.login-feature-item .fi-icon {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem;
+    flex-shrink: 0;
+}
+
+.login-right {
+    width: 380px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-right h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: .3rem;
+}
+
+.login-right .sub {
+    font-size: .82rem;
+    color: var(--text-muted);
     margin-bottom: 2rem;
 }
 
-.login-card .form-control {
-    background: var(--pastel-soft);
-    border-color: transparent;
-    padding: .7rem 1rem;
+.field-group { margin-bottom: 1rem; }
+.field-group label { font-size: .8rem; font-weight: 600; margin-bottom: .4rem; display: block; }
+.field-group .input-wrap { position: relative; }
+.field-group .input-wrap i {
+    position: absolute;
+    left: .9rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
     font-size: .9rem;
+    pointer-events: none;
 }
 
-.login-card .form-control:focus {
+.field-group input {
+    width: 100%;
+    background: var(--page-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: .65rem 1rem .65rem 2.5rem;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: .875rem;
+    color: var(--text-main);
+    outline: none;
+    transition: all .2s;
+}
+
+.field-group input:focus {
     background: #fff;
-    border-color: var(--pastel-primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59,91,219,.12);
 }
 
 .btn-login {
     width: 100%;
     padding: .75rem;
-    background: linear-gradient(135deg, var(--pastel-primary), var(--pastel-primary-dark));
+    background: linear-gradient(135deg, #3b5bdb, #2f4ac2);
     border: none;
     border-radius: 12px;
     color: #fff;
     font-family: 'Vazirmatn', sans-serif;
-    font-size: .95rem;
-    font-weight: 600;
+    font-size: .9rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all .25s;
-    box-shadow: 0 4px 15px rgba(124,158,248,.35);
+    transition: all .22s;
+    box-shadow: 0 4px 14px rgba(59,91,219,.35);
     margin-top: .5rem;
 }
 
 .btn-login:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(124,158,248,.45);
+    box-shadow: 0 8px 22px rgba(59,91,219,.45);
 }
 
 .login-divider {
     display: flex;
     align-items: center;
     gap: .75rem;
-    margin: 1.5rem 0 1rem;
-    color: var(--pastel-muted);
-    font-size: .78rem;
+    margin: 1.25rem 0;
+    color: var(--text-muted);
+    font-size: .75rem;
 }
 
 .login-divider::before, .login-divider::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--pastel-border);
+    background: var(--border);
 }
 
-.login-hint {
-    background: linear-gradient(135deg, #eef2ff, #fdf2f8);
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    margin-top: 1.5rem;
-}
-
-.login-hint-item {
+.method-badge {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: .5rem;
-    font-size: .8rem;
-    color: var(--pastel-muted);
-    margin-bottom: .4rem;
+    background: var(--page-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .6rem .85rem;
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin-bottom: .5rem;
 }
 
-.login-hint-item:last-child { margin-bottom: 0; }
+.method-badge i { color: var(--primary); font-size: .9rem; }
 
-.login-hint-item i {
-    color: var(--pastel-primary);
-    margin-top: .1rem;
-    flex-shrink: 0;
+@media (max-width: 640px) {
+    .login-left { display: none; }
+    .login-right { width: 100%; }
 }
 {% endblock %}
 
 {% block content %}
-<div class="login-wrapper">
-    <div class="login-box">
+<div class="login-outer">
+    <div class="login-container">
 
-        <div class="login-card">
-            <div class="text-center">
-                <div class="login-logo">
-                    <i class="bi bi-grid-1x2-fill"></i>
+        <!-- Left decorative panel -->
+        <div class="login-left">
+            <div>
+                <div class="logo-wrap">
+                    <div class="logo-box"><i class="bi bi-grid-1x2-fill"></i></div>
+                    <div class="logo-text">
+                        <div class="t1">پرتال سازمانی</div>
+                        <div class="t2">شرکت نمونه</div>
+                    </div>
                 </div>
-                <div class="login-title">خوش آمدید</div>
-                <div class="login-subtitle">برای ادامه وارد پرتال سازمانی شوید</div>
+                <h2>یک پرتال،<br>تمام نرم‌افزارها</h2>
+                <p>با یک بار ورود به تمام سیستم‌های سازمانی خود دسترسی داشته باشید.</p>
+                <div class="login-features">
+                    <div class="login-feature-item">
+                        <div class="fi-icon"><i class="bi bi-building"></i></div>
+                        <span>یکپارچه با اکتیو دایرکتوری سازمان</span>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="fi-icon"><i class="bi bi-shield-lock"></i></div>
+                        <span>مدیریت متمرکز دسترسی‌ها</span>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="fi-icon"><i class="bi bi-grid"></i></div>
+                        <span>دسترسی به BI، BPM، حضور و غیاب و ...</span>
+                    </div>
+                </div>
             </div>
+            <div style="font-size:.72rem;opacity:.4;">© {{ "now"|date:"Y" }} پرتال سازمانی — تمام حقوق محفوظ است</div>
+        </div>
 
-            {% if form.non_field_errors %}
-            <div class="alert alert-danger mb-3">
-                <i class="bi bi-exclamation-triangle-fill ms-1"></i>
-                {{ form.non_field_errors|join:", " }}
-            </div>
-            {% endif %}
+        <!-- Right login form -->
+        <div class="login-right">
+            <h3>ورود به حساب</h3>
+            <p class="sub">اطلاعات کاربری خود را وارد کنید</p>
 
             {% if messages %}
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3" style="font-size:.82rem;">
                 {{ message }}
             </div>
             {% endfor %}
@@ -155,24 +255,18 @@ body { background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #f0fdf4 100%
 
             <form method="post" autocomplete="off">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">نام کاربری</label>
-                    <div class="input-group">
-                        <span class="input-group-text" style="background:var(--pastel-soft);border-color:transparent;border-left:0;">
-                            <i class="bi bi-person" style="color:var(--pastel-muted);"></i>
-                        </span>
-                        <input type="text" name="username" class="form-control" placeholder="نام کاربری خود را وارد کنید"
-                               style="border-right:0;" required autofocus>
+                <div class="field-group">
+                    <label>نام کاربری</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input type="text" name="username" placeholder="نام کاربری یا شماره پرسنلی" required autofocus>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">رمز عبور</label>
-                    <div class="input-group">
-                        <span class="input-group-text" style="background:var(--pastel-soft);border-color:transparent;border-left:0;">
-                            <i class="bi bi-lock" style="color:var(--pastel-muted);"></i>
-                        </span>
-                        <input type="password" name="password" class="form-control" placeholder="رمز عبور خود را وارد کنید"
-                               style="border-right:0;" required>
+                <div class="field-group">
+                    <label>رمز عبور</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" name="password" placeholder="رمز عبور یا کد ملی" required>
                     </div>
                 </div>
                 <button type="submit" class="btn-login">
@@ -180,20 +274,22 @@ body { background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #f0fdf4 100%
                 </button>
             </form>
 
-            <div class="login-hint">
-                <div class="login-hint-item">
-                    <i class="bi bi-building"></i>
-                    <span>کاربران اکتیو دایرکتوری: نام کاربری شبکه + رمز AD</span>
-                </div>
-                <div class="login-hint-item">
-                    <i class="bi bi-person-badge"></i>
-                    <span>ورود محلی: شماره پرسنلی به عنوان نام کاربری، کدملی به عنوان رمز</span>
+            <div class="login-divider">روش‌های ورود</div>
+
+            <div class="method-badge">
+                <i class="bi bi-building"></i>
+                <div>
+                    <div style="font-weight:600;color:var(--text-main);">اکتیو دایرکتوری (AD)</div>
+                    <div>نام کاربری شبکه + رمز AD</div>
                 </div>
             </div>
-        </div>
-
-        <div class="text-center mt-3" style="font-size:.75rem;color:var(--pastel-muted);">
-            پرتال سازمانی &copy; {{ "now"|date:"Y" }}
+            <div class="method-badge">
+                <i class="bi bi-person-badge"></i>
+                <div>
+                    <div style="font-weight:600;color:var(--text-main);">ورود محلی</div>
+                    <div>شماره پرسنلی + کدملی به عنوان رمز</div>
+                </div>
+            </div>
         </div>
 
     </div>
