@@ -1,85 +1,81 @@
 @echo off
-chcp 65001 > nul
-title پرتال یکپارچه - در حال اجرا
+title Portal - Running
 
 echo.
-echo  ╔══════════════════════════════════════════╗
-echo  ║         اجرای پرتال یکپارچه             ║
-echo  ╚══════════════════════════════════════════╝
+echo ============================================
+echo    Starting Portal
+echo ============================================
 echo.
 
-:: ─── بررسی venv ──────────────────────────────────────────────────────────────
+:: Check venv
 if not exist venv\Scripts\activate.bat (
-    echo  [!] محیط مجازی یافت نشد. ابتدا install.bat را اجرا کنید.
+    echo [ERROR] Virtual environment not found!
+    echo Please run install.bat first.
     pause
     exit /b 1
 )
 
+:: Activate venv
 call venv\Scripts\activate.bat
 
-:: ─── بررسی .env ──────────────────────────────────────────────────────────────
+:: Check .env
 if not exist .env (
-    echo  [!] فایل .env یافت نشد. ابتدا install.bat را اجرا کنید.
+    echo [ERROR] .env file not found!
+    echo Please run install.bat first.
     pause
     exit /b 1
 )
 
-:: ─── Migration ───────────────────────────────────────────────────────────────
-echo [1/3] اعمال migration های دیتابیس...
-python manage.py migrate --run-syncdb 2>&1
+:: Run migrations
+echo [1/3] Running database migrations...
+python manage.py migrate --run-syncdb
 if %errorlevel% neq 0 (
     echo.
-    echo  [!] خطا در اتصال به دیتابیس.
-    echo      لطفاً اطلاعات .env را بررسی کنید:
-    echo       - DB_HOST, DB_NAME, DB_USER, DB_PASSWORD
-    echo       - مطمئن شوید SQL Server در حال اجراست
-    echo       - مطمئن شوید ODBC Driver 17 for SQL Server نصب است
+    echo [ERROR] Database connection failed!
     echo.
-    echo  برای دانلود ODBC Driver:
-    echo  https://aka.ms/downloadmsodbcsql
+    echo Please check your .env file:
+    echo   DB_HOST, DB_NAME, DB_USER, DB_PASSWORD
+    echo.
+    echo Also make sure:
+    echo   - SQL Server is running
+    echo   - ODBC Driver 17 for SQL Server is installed
+    echo     Download: https://aka.ms/downloadmsodbcsql
     echo.
     pause
     exit /b 1
 )
-echo  [OK] دیتابیس آماده است
+echo [OK] Database ready
 echo.
 
-:: ─── Superuser ───────────────────────────────────────────────────────────────
-echo [2/3] بررسی کاربر مدیر...
-python manage.py shell -c "from apps.accounts.models import User; print('EXISTS') if User.objects.filter(is_superuser=True).exists() else print('NONE')" 2>nul > __check_su.tmp
-set /p SU_STATUS=<__check_su.tmp
-del __check_su.tmp 2>nul
-
-if "%SU_STATUS%"=="NONE" (
+:: Check superuser
+echo [2/3] Checking admin user...
+python manage.py shell -c "from apps.accounts.models import User; exit(0 if User.objects.filter(is_superuser=True).exists() else 1)" 2>nul
+if %errorlevel% neq 0 (
     echo.
-    echo  ────────────────────────────────────────────
-    echo   هیچ کاربر مدیری وجود ندارد.
-    echo   لطفاً اطلاعات مدیر اول را وارد کنید:
-    echo  ────────────────────────────────────────────
+    echo No admin user found. Create one now:
+    echo ----------------------------------------
     python manage.py createsuperuser
-    echo  [OK] کاربر مدیر ایجاد شد
+    echo [OK] Admin user created
 ) else (
-    echo  [OK] کاربر مدیر از قبل موجود است
+    echo [OK] Admin user exists
 )
 echo.
 
-:: ─── جمع‌آوری فایل‌های استاتیک ───────────────────────────────────────────────
-echo [3/3] جمع‌آوری فایل‌های استاتیک...
-python manage.py collectstatic --noinput --clear 2>nul
-echo  [OK] فایل‌های استاتیک آماده شدند
+:: Collect static files
+echo [3/3] Collecting static files...
+python manage.py collectstatic --noinput --clear >nul 2>&1
+echo [OK] Static files ready
 echo.
 
-:: ─── اجرای سرور ──────────────────────────────────────────────────────────────
+echo ============================================
+echo  Portal is running!
 echo.
-echo  ╔══════════════════════════════════════════════════════════╗
-echo  ║  پرتال در حال اجراست!                                   ║
-echo  ║                                                          ║
-echo  ║  آدرس:  http://localhost:8000                            ║
-echo  ║  ادمین: http://localhost:8000/admin                      ║
-echo  ║                                                          ║
-echo  ║  برای توقف: Ctrl+C را فشار دهید                         ║
-echo  ╚══════════════════════════════════════════════════════════╝
+echo  URL:   http://localhost:8000
+echo  Admin: http://localhost:8000/admin
+echo.
+echo  Press Ctrl+C to stop
+echo ============================================
 echo.
 
-start "" http://localhost:8000
+start http://localhost:8000
 python manage.py runserver 0.0.0.0:8000
