@@ -3,43 +3,109 @@
 {% block title %}داشبورد{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-speedometer2 me-2"></i>داشبورد</h2>
-    <span class="text-muted">خوش آمدید، {{ user.get_full_name|default:user.username }}</span>
+
+<!-- ── Welcome strip ── -->
+<div class="d-flex align-items-center justify-content-between mb-5">
+    <div>
+        <h4 class="fw-700 mb-1" style="font-size:1.35rem;">
+            سلام، {{ user.get_full_name|default:user.username }} 👋
+        </h4>
+        <p style="color:var(--pastel-muted);font-size:.9rem;margin:0;">
+            به پرتال سازمانی خوش آمدید. نرم‌افزارهای در دسترس شما در زیر نمایش داده شده‌اند.
+        </p>
+    </div>
+    {% if user.is_staff %}
+    <a href="/admin/dashboard/integratedapp/add/" class="btn-portal" style="text-decoration:none;white-space:nowrap;">
+        <i class="bi bi-plus-lg ms-1"></i>افزودن نرم‌افزار
+    </a>
+    {% endif %}
 </div>
 
 {% if apps %}
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+<!-- ── App grid ── -->
+<div class="row g-4">
     {% for app in apps %}
-    <div class="col">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body text-center py-4">
-                <i class="bi {{ app.icon_class }} text-primary mb-3 d-block" style="font-size: 3rem;"></i>
-                <h5 class="card-title">{{ app.name }}</h5>
-                {% if app.description %}
-                <p class="card-text text-muted small">{{ app.description }}</p>
-                {% endif %}
-                <span class="badge bg-secondary">{{ app.get_app_type_display }}</span>
-            </div>
-            <div class="card-footer bg-transparent">
-                <a href="{{ app.url }}" {% if app.open_in_new_tab %}target="_blank"{% endif %} class="btn btn-primary w-100">
-                    <i class="bi bi-box-arrow-up-right me-1"></i>باز کردن
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+        <div class="portal-card h-100 app-tile" style="overflow:hidden;transition:all .25s;">
+            <!-- color accent bar based on type -->
+            <div class="app-accent-bar" style="height:4px;background:
+                {% if app.app_type == 'bi' %}linear-gradient(90deg,#7c9ef8,#c4b5fd)
+                {% elif app.app_type == 'bpm' %}linear-gradient(90deg,#86efac,#34d399)
+                {% elif app.app_type == 'attendance' %}linear-gradient(90deg,#fde68a,#fb923c)
+                {% elif app.app_type == 'hr' %}linear-gradient(90deg,#f9a8d4,#f472b6)
+                {% else %}linear-gradient(90deg,#a5b4fc,#818cf8){% endif %};"></div>
+
+            <div class="p-4 d-flex flex-column h-100">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="app-icon-box" style="
+                        width:52px;height:52px;border-radius:14px;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:1.5rem;
+                        background:
+                        {% if app.app_type == 'bi' %}#eef2ff
+                        {% elif app.app_type == 'bpm' %}#f0fdf4
+                        {% elif app.app_type == 'attendance' %}#fffbeb
+                        {% elif app.app_type == 'hr' %}#fdf2f8
+                        {% else %}#f5f3ff{% endif %};
+                        color:
+                        {% if app.app_type == 'bi' %}#5b7de8
+                        {% elif app.app_type == 'bpm' %}#16a34a
+                        {% elif app.app_type == 'attendance' %}#d97706
+                        {% elif app.app_type == 'hr' %}#db2777
+                        {% else %}#6d28d9{% endif %};">
+                        <i class="bi {{ app.icon_class }}"></i>
+                    </div>
+                    {% if app.open_in_new_tab %}
+                    <i class="bi bi-box-arrow-up-right" style="color:var(--pastel-muted);font-size:.8rem;"></i>
+                    {% endif %}
+                </div>
+
+                <h6 class="fw-700 mb-1" style="font-size:.95rem;">{{ app.name }}</h6>
+                <p style="font-size:.8rem;color:var(--pastel-muted);flex:1;margin-bottom:1rem;">
+                    {{ app.description|default:app.get_app_type_display }}
+                </p>
+
+                <a href="{{ app.url }}" {% if app.open_in_new_tab %}target="_blank"{% endif %}
+                   class="btn-portal-soft d-block text-center" style="text-decoration:none;font-size:.85rem;">
+                    باز کردن <i class="bi bi-arrow-left me-1"></i>
                 </a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
 {% else %}
-<div class="text-center py-5">
-    <i class="bi bi-app-indicator text-muted mb-3 d-block" style="font-size: 4rem;"></i>
-    <h5 class="text-muted">هیچ اپلیکیشنی در دسترس نیست.</h5>
+<!-- ── Empty state ── -->
+<div class="text-center py-5 my-4">
+    <div style="width:96px;height:96px;background:var(--pastel-soft);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--pastel-primary);margin:0 auto 1.5rem;">
+        <i class="bi bi-grid-x"></i>
+    </div>
+    <h5 style="font-weight:700;color:var(--pastel-text);margin-bottom:.5rem;">هیچ نرم‌افزاری در دسترس نیست</h5>
+    <p style="color:var(--pastel-muted);font-size:.9rem;max-width:360px;margin:0 auto 1.5rem;">
+        هنوز هیچ نرم‌افزاری به حساب کاربری شما اختصاص داده نشده. با مدیر سیستم تماس بگیرید.
+    </p>
     {% if user.is_staff %}
-    <p class="text-muted">از پنل ادمین اپلیکیشن‌ها را اضافه کنید.</p>
-    <a href="/admin/dashboard/integratedapp/add/" class="btn btn-primary mt-2">
-        <i class="bi bi-plus-circle me-1"></i>افزودن اپلیکیشن
+    <a href="/admin/dashboard/integratedapp/add/" class="btn-portal" style="text-decoration:none;">
+        <i class="bi bi-plus-lg ms-1"></i>افزودن اولین نرم‌افزار
     </a>
     {% endif %}
 </div>
 {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.app-tile').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+        el.style.transform = 'translateY(-4px)';
+        el.style.boxShadow = '0 12px 40px rgba(124,158,248,.15)';
+    });
+    el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+        el.style.boxShadow = '';
+    });
+});
+</script>
 {% endblock %}

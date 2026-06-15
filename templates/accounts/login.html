@@ -1,24 +1,201 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}ورود به پورتال{% endblock %}
+{% block title %}ورود به پرتال{% endblock %}
+
+{% block extra_style %}
+body { background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #f0fdf4 100%); }
+
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid var(--pastel-border);
+    box-shadow: 0 20px 60px rgba(124,158,248,.12);
+    padding: 2.5rem 2rem;
+}
+
+.login-logo {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--pastel-primary), var(--pastel-purple));
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem;
+    color: #fff;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 8px 20px rgba(124,158,248,.35);
+}
+
+.login-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--pastel-text);
+    margin-bottom: .25rem;
+}
+
+.login-subtitle {
+    font-size: .875rem;
+    color: var(--pastel-muted);
+    margin-bottom: 2rem;
+}
+
+.login-card .form-control {
+    background: var(--pastel-soft);
+    border-color: transparent;
+    padding: .7rem 1rem;
+    font-size: .9rem;
+}
+
+.login-card .form-control:focus {
+    background: #fff;
+    border-color: var(--pastel-primary);
+}
+
+.btn-login {
+    width: 100%;
+    padding: .75rem;
+    background: linear-gradient(135deg, var(--pastel-primary), var(--pastel-primary-dark));
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .25s;
+    box-shadow: 0 4px 15px rgba(124,158,248,.35);
+    margin-top: .5rem;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124,158,248,.45);
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: 1.5rem 0 1rem;
+    color: var(--pastel-muted);
+    font-size: .78rem;
+}
+
+.login-divider::before, .login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--pastel-border);
+}
+
+.login-hint {
+    background: linear-gradient(135deg, #eef2ff, #fdf2f8);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-top: 1.5rem;
+}
+
+.login-hint-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    font-size: .8rem;
+    color: var(--pastel-muted);
+    margin-bottom: .4rem;
+}
+
+.login-hint-item:last-child { margin-bottom: 0; }
+
+.login-hint-item i {
+    color: var(--pastel-primary);
+    margin-top: .1rem;
+    flex-shrink: 0;
+}
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow">
-            <div class="card-body p-4">
-                <div class="text-center mb-4">
-                    <i class="bi bi-grid-3x3-gap-fill text-primary" style="font-size: 3rem;"></i>
-                    <h4 class="mt-2 mb-0">ورود به پورتال سازمانی</h4>
+<div class="login-wrapper">
+    <div class="login-box">
+
+        <div class="login-card">
+            <div class="text-center">
+                <div class="login-logo">
+                    <i class="bi bi-grid-1x2-fill"></i>
                 </div>
-                <div class="alert alert-info" role="alert">
-                    <i class="bi bi-info-circle me-2"></i>
-                    ورود با اکتیو دایرکتوری (AD) در صورت فعال بودن به صورت خودکار انجام می‌شود.
+                <div class="login-title">خوش آمدید</div>
+                <div class="login-subtitle">برای ادامه وارد پرتال سازمانی شوید</div>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+                <i class="bi bi-exclamation-triangle-fill ms-1"></i>
+                {{ form.non_field_errors|join:", " }}
+            </div>
+            {% endif %}
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">نام کاربری</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background:var(--pastel-soft);border-color:transparent;border-left:0;">
+                            <i class="bi bi-person" style="color:var(--pastel-muted);"></i>
+                        </span>
+                        <input type="text" name="username" class="form-control" placeholder="نام کاربری خود را وارد کنید"
+                               style="border-right:0;" required autofocus>
+                    </div>
                 </div>
-                {% crispy form %}
+                <div class="mb-3">
+                    <label class="form-label">رمز عبور</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background:var(--pastel-soft);border-color:transparent;border-left:0;">
+                            <i class="bi bi-lock" style="color:var(--pastel-muted);"></i>
+                        </span>
+                        <input type="password" name="password" class="form-control" placeholder="رمز عبور خود را وارد کنید"
+                               style="border-right:0;" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="bi bi-box-arrow-in-right ms-2"></i>ورود به سیستم
+                </button>
+            </form>
+
+            <div class="login-hint">
+                <div class="login-hint-item">
+                    <i class="bi bi-building"></i>
+                    <span>کاربران اکتیو دایرکتوری: نام کاربری شبکه + رمز AD</span>
+                </div>
+                <div class="login-hint-item">
+                    <i class="bi bi-person-badge"></i>
+                    <span>ورود محلی: شماره پرسنلی به عنوان نام کاربری، کدملی به عنوان رمز</span>
+                </div>
             </div>
         </div>
+
+        <div class="text-center mt-3" style="font-size:.75rem;color:var(--pastel-muted);">
+            پرتال سازمانی &copy; {{ "now"|date:"Y" }}
+        </div>
+
     </div>
 </div>
 {% endblock %}
