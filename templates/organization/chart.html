@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}نمودار سازمانی{% endblock %}
+
+{% block extra_css %}
+<style>
+    #chart-container {
+        width: 100%;
+        min-height: 600px;
+        border: 1px solid #dee2e6;
+        border-radius: .375rem;
+        overflow: auto;
+        background: #fff;
+    }
+    .org-node {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #0d6efd;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 4px;
+        text-align: center;
+        min-width: 120px;
+    }
+    .org-node:hover { background: #0b5ed7; }
+    .org-children {
+        padding-right: 30px;
+        border-right: 2px solid #dee2e6;
+        margin-right: 20px;
+        margin-top: 4px;
+    }
+    .org-item { margin: 8px 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-diagram-3 me-2"></i>نمودار سازمانی</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'organization:company-create' %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-building-add me-1"></i>افزودن شرکت
+        </a>
+        <a href="{% url 'organization:department-create' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-diagram-2 me-1"></i>افزودن دپارتمان
+        </a>
+        <a href="{% url 'organization:position-create' %}" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-person-badge me-1"></i>افزودن پست
+        </a>
+    </div>
+</div>
+
+<div id="chart-container" class="p-4">
+    <div id="tree"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const chartData = {{ chart_data|safe }};
+
+function buildNode(node) {
+    const item = document.createElement('div');
+    item.className = 'org-item';
+
+    const nodeEl = document.createElement('div');
+    nodeEl.className = 'org-node';
+    nodeEl.innerHTML = `<strong>${node.name}</strong><br><small style="opacity:.8">${node.title}</small>`;
+    item.appendChild(nodeEl);
+
+    if (node.children && node.children.length > 0) {
+        const children = document.createElement('div');
+        children.className = 'org-children';
+        node.children.forEach(child => children.appendChild(buildNode(child)));
+        item.appendChild(children);
+    }
+    return item;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('tree');
+    if (chartData.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-5"><i class="bi bi-building fs-1 d-block mb-2"></i>هنوز هیچ شرکتی تعریف نشده است.</div>';
+        return;
+    }
+    chartData.forEach(node => container.appendChild(buildNode(node)));
+});
+</script>
+{% endblock %}

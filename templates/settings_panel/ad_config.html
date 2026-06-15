@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}تنظیمات اکتیو دایرکتوری{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-server me-2"></i>تنظیمات اکتیو دایرکتوری</h5>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'settings_panel:general' %}" class="btn btn-outline-secondary btn-sm">تنظیمات عمومی</a>
+                    <button type="button" class="btn btn-outline-info btn-sm" id="testBtn" onclick="testConnection()">
+                        <i class="bi bi-wifi me-1"></i>تست اتصال
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="testResult" class="mb-3" style="display:none;"></div>
+                {% crispy form %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>راهنما</h6></div>
+            <div class="card-body">
+                <p class="small text-muted">برای اتصال به اکتیو دایرکتوری، تنظیمات سرور LDAP را وارد کنید.</p>
+                <ul class="small text-muted">
+                    <li><strong>آدرس سرور:</strong> مثال: ldap://dc.company.com</li>
+                    <li><strong>Bind DN:</strong> حساب کاربری برای اتصال</li>
+                    <li><strong>پایه جستجو:</strong> مثال: DC=company,DC=com</li>
+                    <li><strong>فیلتر جستجو:</strong> مثال: (sAMAccountName=%(user)s)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function testConnection() {
+    const btn = document.getElementById('testBtn');
+    const result = document.getElementById('testResult');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>در حال تست...';
+
+    fetch('{% url "settings_panel:test-ad" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        result.style.display = 'block';
+        result.className = `alert alert-${data.success ? 'success' : 'danger'}`;
+        result.innerHTML = `<i class="bi bi-${data.success ? 'check-circle' : 'x-circle'} me-2"></i>${data.message}`;
+    })
+    .catch(e => {
+        result.style.display = 'block';
+        result.className = 'alert alert-danger';
+        result.innerHTML = '<i class="bi bi-x-circle me-2"></i>خطا در ارتباط با سرور.';
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-wifi me-1"></i>تست اتصال';
+    });
+}
+</script>
+{% endblock %}
