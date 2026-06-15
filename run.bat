@@ -28,7 +28,7 @@ if not exist .env (
 
 :: Run migrations
 echo [1/3] Running database migrations...
-python manage.py migrate --run-syncdb
+python manage.py migrate
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Database connection failed!
