@@ -77,5 +77,7 @@ echo  Press Ctrl+C to stop
 echo ============================================
 echo.
 
-start http://localhost:8000
+echo Waiting for server to start...
+start /wait "" timeout /t 3 /nobreak >nul
+start http://localhost:8000/accounts/login/
 python manage.py runserver 0.0.0.0:8000
