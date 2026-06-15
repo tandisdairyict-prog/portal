@@ -10,7 +10,6 @@ body {
     align-items: center;
     justify-content: center;
 }
-
 .login-outer {
     width: 100%;
     min-height: 100vh;
@@ -19,7 +18,6 @@ body {
     justify-content: center;
     padding: 2rem 1rem;
 }
-
 .login-container {
     display: flex;
     border-radius: 24px;
@@ -29,7 +27,6 @@ body {
     max-width: 860px;
     background: #fff;
 }
-
 .login-left {
     flex: 1;
     background: linear-gradient(145deg, #1e2a4a 0%, #3b5bdb 100%);
@@ -40,95 +37,43 @@ body {
     color: #fff;
     min-height: 500px;
 }
-
 .login-left .logo-wrap {
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-    margin-bottom: 3rem;
+    display: flex; align-items: center; gap: .75rem; margin-bottom: 3rem;
 }
-
 .login-left .logo-box {
     width: 44px; height: 44px;
     background: rgba(255,255,255,.15);
     border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.3rem;
-    backdrop-filter: blur(8px);
 }
-
 .login-left .logo-text .t1 { font-size: 1rem; font-weight: 700; }
 .login-left .logo-text .t2 { font-size: .75rem; opacity: .65; }
-
-.login-left h2 {
-    font-size: 1.6rem;
-    font-weight: 800;
-    line-height: 1.4;
-    margin-bottom: .75rem;
-}
-
-.login-left p {
-    font-size: .85rem;
-    opacity: .75;
-    line-height: 1.7;
-}
-
-.login-features {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: .75rem;
-}
-
-.login-feature-item {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    font-size: .8rem;
-    opacity: .85;
-}
-
+.login-left h2 { font-size: 1.6rem; font-weight: 800; line-height: 1.4; margin-bottom: .75rem; }
+.login-left p  { font-size: .85rem; opacity: .75; line-height: 1.7; }
+.login-features { margin-top: 2rem; display: flex; flex-direction: column; gap: .75rem; }
+.login-feature-item { display: flex; align-items: center; gap: .6rem; font-size: .8rem; opacity: .85; }
 .login-feature-item .fi-icon {
     width: 28px; height: 28px;
     background: rgba(255,255,255,.15);
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: .85rem;
-    flex-shrink: 0;
+    font-size: .85rem; flex-shrink: 0;
 }
-
 .login-right {
-    width: 380px;
-    padding: 2.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    width: 380px; padding: 2.5rem 2rem;
+    display: flex; flex-direction: column; justify-content: center;
 }
-
-.login-right h3 {
-    font-size: 1.3rem;
-    font-weight: 800;
-    margin-bottom: .3rem;
-}
-
-.login-right .sub {
-    font-size: .82rem;
-    color: var(--text-muted);
-    margin-bottom: 2rem;
-}
-
+.login-right h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: .3rem; }
+.login-right .sub { font-size: .82rem; color: var(--text-muted); margin-bottom: 2rem; }
 .field-group { margin-bottom: 1rem; }
 .field-group label { font-size: .8rem; font-weight: 600; margin-bottom: .4rem; display: block; }
 .field-group .input-wrap { position: relative; }
 .field-group .input-wrap i {
-    position: absolute;
-    left: .9rem; top: 50%;
+    position: absolute; left: .9rem; top: 50%;
     transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: .9rem;
-    pointer-events: none;
+    color: var(--text-muted); font-size: .9rem; pointer-events: none;
 }
-
 .field-group input {
     width: 100%;
     background: var(--page-bg);
@@ -136,81 +81,44 @@ body {
     border-radius: 10px;
     padding: .65rem 1rem .65rem 2.5rem;
     font-family: 'Vazirmatn', sans-serif;
-    font-size: .875rem;
-    color: var(--text-main);
-    outline: none;
-    transition: all .2s;
+    font-size: .875rem; color: var(--text-main);
+    outline: none; transition: all .2s;
 }
-
 .field-group input:focus {
-    background: #fff;
-    border-color: var(--primary);
+    background: #fff; border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(59,91,219,.12);
 }
-
 .btn-login {
-    width: 100%;
-    padding: .75rem;
+    width: 100%; padding: .75rem;
     background: linear-gradient(135deg, #3b5bdb, #2f4ac2);
-    border: none;
-    border-radius: 12px;
-    color: #fff;
+    border: none; border-radius: 12px; color: #fff;
     font-family: 'Vazirmatn', sans-serif;
-    font-size: .9rem;
-    font-weight: 700;
-    cursor: pointer;
+    font-size: .9rem; font-weight: 700; cursor: pointer;
     transition: all .22s;
-    box-shadow: 0 4px 14px rgba(59,91,219,.35);
-    margin-top: .5rem;
+    box-shadow: 0 4px 14px rgba(59,91,219,.35); margin-top: .5rem;
 }
-
-.btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(59,91,219,.45);
-}
-
+.btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(59,91,219,.45); }
 .login-divider {
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-    margin: 1.25rem 0;
-    color: var(--text-muted);
-    font-size: .75rem;
+    display: flex; align-items: center; gap: .75rem;
+    margin: 1.25rem 0; color: var(--text-muted); font-size: .75rem;
 }
-
 .login-divider::before, .login-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    content: ''; flex: 1; height: 1px; background: var(--border);
 }
-
 .method-badge {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    background: var(--page-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: .6rem .85rem;
-    font-size: .78rem;
-    color: var(--text-muted);
-    margin-bottom: .5rem;
+    display: flex; align-items: center; gap: .5rem;
+    background: var(--page-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: .6rem .85rem;
+    font-size: .78rem; color: var(--text-muted); margin-bottom: .5rem;
 }
-
 .method-badge i { color: var(--primary); font-size: .9rem; }
-
-@media (max-width: 640px) {
-    .login-left { display: none; }
-    .login-right { width: 100%; }
-}
+@media (max-width: 640px) { .login-left { display: none; } .login-right { width: 100%; } }
 {% endblock %}
 
-{% block content %}
+{% block content_nologin %}
 <div class="login-outer">
     <div class="login-container">
 
-        <!-- Left decorative panel -->
         <div class="login-left">
             <div>
                 <div class="logo-wrap">
@@ -237,10 +145,9 @@ body {
                     </div>
                 </div>
             </div>
-            <div style="font-size:.72rem;opacity:.4;">© {{ "now"|date:"Y" }} پرتال سازمانی — تمام حقوق محفوظ است</div>
+            <div style="font-size:.72rem;opacity:.4;">© پرتال سازمانی — تمام حقوق محفوظ است</div>
         </div>
 
-        <!-- Right login form -->
         <div class="login-right">
             <h3>ورود به حساب</h3>
             <p class="sub">اطلاعات کاربری خود را وارد کنید</p>
@@ -294,4 +201,4 @@ body {
 
     </div>
 </div>
-{% endblock %}
+{% endblock content_nologin %}
