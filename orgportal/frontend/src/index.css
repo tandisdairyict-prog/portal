@@ -1,0 +1,11 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Vazirmatn', sans-serif;
+  background: #f4f6fb;
+  direction: rtl;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+.ant-layout-sider { direction: rtl; }
