@@ -1,91 +1,59 @@
-import { useState, useEffect } from 'react'
-import { Card, Tag, Tooltip, Spin, Empty } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
-import { getPositionTree } from '../api/positions'
-import type { PositionTree } from '../types'
+import { useEffect, useState } from 'react'
+import { Card, Spin, Tag } from 'antd'
+import { getOrgChart } from '../api/orgchart'
 
-function OrgNode({ node, depth = 0 }: { node: PositionTree; depth?: number }) {
+interface OrgNode {
+  id: number
+  title: string
+  departmentName?: string
+  assignedUserName?: string
+  children?: OrgNode[]
+}
+
+function OrgNodeCard({ node, depth = 0 }: { node: OrgNode; depth?: number }) {
   const [expanded, setExpanded] = useState(depth < 2)
-  const colors = ['#3b5bdb', '#16a34a', '#d97706', '#7c3aed', '#0891b2']
-  const color = colors[depth % colors.length]
+  const hasChildren = node.children && node.children.length > 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-      <div style={{
-        background: '#fff', border: `2px solid ${color}`, borderRadius: 12,
-        padding: '12px 20px', minWidth: 160, textAlign: 'center',
-        boxShadow: '0 4px 12px rgba(0,0,0,.08)', cursor: 'pointer',
-        transition: 'all .2s',
-      }} onClick={() => node.children.length > 0 && setExpanded(!expanded)}>
-        <div style={{ fontWeight: 700, fontSize: 13, color: '#1a202c', marginBottom: 4 }}>{node.title}</div>
-        {node.assignedUsers.map(u => (
-          <Tooltip key={u.id} title={u.fullName}>
-            <Tag icon={<UserOutlined />} color="blue" style={{ fontSize: 11, margin: '2px' }}>
-              {u.fullName}
-            </Tag>
-          </Tooltip>
-        ))}
-        {node.children.length > 0 && (
-          <div style={{ fontSize: 11, color: '#718096', marginTop: 4 }}>
-            {expanded ? '▲' : '▼'} {node.children.length} زیرمجموعه
-          </div>
-        )}
-      </div>
-
-      {expanded && node.children.length > 0 && (
-        <>
-          <div style={{ width: 2, height: 24, background: color }} />
-          <div style={{ display: 'flex', gap: 16, position: 'relative' }}>
-            {node.children.length > 1 && (
-              <div style={{
-                position: 'absolute', top: 0, right: 0, left: 0,
-                height: 2, background: color, zIndex: 0
-              }} />
-            )}
-            {node.children.map(child => (
-              <div key={child.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ width: 2, height: 24, background: color }} />
-                <OrgNode node={child} depth={depth + 1} />
-              </div>
-            ))}
-          </div>
-        </>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Card
+        size="small"
+        style={{ minWidth: 160, textAlign: 'center', cursor: hasChildren ? 'pointer' : 'default', borderColor: depth === 0 ? '#3b5bdb' : '#d9d9d9' }}
+        onClick={() => hasChildren && setExpanded(!expanded)}
+      >
+        <div style={{ fontWeight: 600, fontSize: 13 }}>{node.title}</div>
+        {node.departmentName && <div style={{ fontSize: 11, color: '#888' }}>{node.departmentName}</div>}
+        {node.assignedUserName && <Tag color="blue" style={{ marginTop: 4, fontSize: 11 }}>{node.assignedUserName}</Tag>}
+        {hasChildren && <div style={{ fontSize: 10, color: '#3b5bdb', marginTop: 4 }}>{expanded ? '▲' : '▼'} {node.children!.length}</div>}
+      </Card>
+      {hasChildren && expanded && (
+        <div style={{ marginTop: 8, display: 'flex', gap: 16, position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 0, left: '50%', width: '100%', height: 1, background: '#d9d9d9', transform: 'translateX(-50%)' }} />
+          {node.children!.map(child => (
+            <OrgNodeCard key={child.id} node={child} depth={depth + 1} />
+          ))}
+        </div>
       )}
     </div>
   )
 }
 
 export default function OrgChartPage() {
-  const [tree, setTree] = useState<PositionTree[]>([])
-  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<OrgNode | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
-    getPositionTree().then(setTree).finally(() => setLoading(false))
+    getOrgChart().then(setData).finally(() => setLoading(false))
   }, [])
+
+  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>نمودار سازمانی</div>
-          <div style={{ color: '#718096', fontSize: 13 }}>ساختار سلسله‌مراتبی سازمان</div>
-        </div>
+      <h2 style={{ fontWeight: 700, marginBottom: 24 }}>چارت سازمانی</h2>
+      <div style={{ overflowX: 'auto', padding: '24px 0' }}>
+        {data ? <OrgNodeCard node={data} /> : <p>داده‌ای یافت نشد</p>}
       </div>
-
-      <Card bordered={false} style={{ borderRadius: 14, overflowX: 'auto', minHeight: 400 }}>
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div>
-        ) : tree.length === 0 ? (
-          <Empty description="هیچ سمتی تعریف نشده" />
-        ) : (
-          <div style={{ padding: 32, overflowX: 'auto', display: 'flex', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', gap: 32 }}>
-              {tree.map(node => <OrgNode key={node.id} node={node} />)}
-            </div>
-          </div>
-        )}
-      </Card>
     </div>
   )
 }

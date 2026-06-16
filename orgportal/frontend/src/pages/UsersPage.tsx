@@ -1,117 +1,93 @@
-import { useState, useEffect } from 'react'
-import { Table, Button, Modal, Form, Input, Tag, Space, Popconfirm, message, Card, Avatar } from 'antd'
-import { UserOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { useEffect, useState } from 'react'
+import { Table, Button, Modal, Form, Input, Select, Space, Popconfirm, message, Tag } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { getUsers, createUser, updateUser, deleteUser } from '../api/users'
-import type { User } from '../types'
-import type { ColumnsType } from 'antd/es/table'
+import { getRoles } from '../api/roles'
+import { getPositions } from '../api/positions'
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<any[]>([])
+  const [roles, setRoles] = useState<any[]>([])
+  const [positions, setPositions] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [editing, setEditing] = useState<any>(null)
   const [form] = Form.useForm()
 
-  const load = async () => { setLoading(true); try { setUsers(await getUsers()) } finally { setLoading(false) } }
+  const load = async () => {
+    setLoading(true)
+    try {
+      const [u, r, p] = await Promise.all([getUsers(), getRoles(), getPositions()])
+      setUsers(u); setRoles(r); setPositions(p)
+    } finally { setLoading(false) }
+  }
+
   useEffect(() => { load() }, [])
 
-  const handleSubmit = async (values: Parameters<typeof createUser>[0] & Partial<User>) => {
+  const openCreate = () => { setEditing(null); form.resetFields(); setModalOpen(true) }
+  const openEdit = (r: any) => { setEditing(r); form.setFieldsValue(r); setModalOpen(true) }
+
+  const handleSave = async () => {
+    const vals = await form.validateFields()
     try {
-      if (editingUser) await updateUser(editingUser.id, values)
-      else await createUser(values as Parameters<typeof createUser>[0])
-      message.success(editingUser ? 'کاربر بروزرسانی شد' : 'کاربر ایجاد شد')
-      setModalOpen(false); form.resetFields(); load()
-    } catch { message.error('خطا در عملیات') }
+      if (editing) await updateUser(editing.id, vals)
+      else await createUser(vals)
+      message.success('ذخیره شد')
+      setModalOpen(false); load()
+    } catch { message.error('خطا') }
   }
 
   const handleDelete = async (id: number) => {
-    try { await deleteUser(id); message.success('کاربر حذف شد'); load() }
-    catch { message.error('خطا در حذف') }
+    await deleteUser(id); message.success('حذف شد'); load()
   }
-
-  const columns: ColumnsType<User> = [
-    {
-      title: 'کاربر', key: 'user',
-      render: (_, r) => (
-        <Space>
-          <Avatar style={{ background: '#3b5bdb' }} icon={<UserOutlined />} />
-          <div>
-            <div style={{ fontWeight: 600 }}>{r.fullName}</div>
-            <div style={{ fontSize: 12, color: '#718096' }}>{r.email}</div>
-          </div>
-        </Space>
-      )
-    },
-    { title: 'نام کاربری', dataIndex: 'username', key: 'username', render: (v: string) => <code style={{ background: '#f0f4ff', padding: '2px 6px', borderRadius: 4 }}>{v}</code> },
-    { title: 'شماره پرسنلی', dataIndex: 'personnelNumber', key: 'personnelNumber' },
-    {
-      title: 'وضعیت', dataIndex: 'isActive', key: 'isActive',
-      render: (v: boolean) => <Tag color={v ? 'success' : 'error'}>{v ? 'فعال' : 'غیرفعال'}</Tag>
-    },
-    {
-      title: 'عملیات', key: 'actions',
-      render: (_, r) => (
-        <Space>
-          <Button size="small" icon={<EditOutlined />} onClick={() => { setEditingUser(r); form.setFieldsValue(r); setModalOpen(true) }} />
-          <Popconfirm title="حذف کاربر؟" onConfirm={() => handleDelete(r.id)} okText="بله" cancelText="خیر">
-            <Button size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      )
-    },
-  ]
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>مدیریت کاربران</div>
-          <div style={{ color: '#718096', fontSize: 13 }}>لیست کاربران سیستم</div>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingUser(null); form.resetFields(); setModalOpen(true) }}>
-          کاربر جدید
-        </Button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontWeight: 700 }}>مدیریت کاربران</h2>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>کاربر جدید</Button>
       </div>
-
-      <Card bordered={false} style={{ borderRadius: 14, boxShadow: '0 1px 6px rgba(0,0,0,.04)' }}>
-        <Table columns={columns} dataSource={users} loading={loading} rowKey="id" />
-      </Card>
-
-      <Modal
-        title={editingUser ? 'ویرایش کاربر' : 'کاربر جدید'}
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        footer={null}
-        width={520}
-      >
-        <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ marginTop: 16 }}>
-          <Form.Item name="firstName" label="نام" rules={[{ required: true }]}>
-            <Input placeholder="نام" />
-          </Form.Item>
-          <Form.Item name="lastName" label="نام خانوادگی" rules={[{ required: true }]}>
-            <Input placeholder="نام خانوادگی" />
-          </Form.Item>
+      <Table
+        dataSource={users} rowKey="id" loading={loading}
+        columns={[
+          { title: 'نام کاربری', dataIndex: 'username' },
+          { title: 'نام و نام خانوادگی', dataIndex: 'displayName' },
+          { title: 'ایمیل', dataIndex: 'email' },
+          { title: 'وضعیت', dataIndex: 'isActive', render: v => <Tag color={v ? 'green' : 'red'}>{v ? 'فعال' : 'غیرفعال'}</Tag> },
+          {
+            title: 'عملیات', render: (_, r) => (
+              <Space>
+                <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(r)} />
+                <Popconfirm title="حذف شود؟" onConfirm={() => handleDelete(r.id)}>
+                  <Button size="small" danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </Space>
+            )
+          }
+        ]}
+      />
+      <Modal title={editing ? 'ویرایش کاربر' : 'کاربر جدید'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} okText="ذخیره" cancelText="انصراف">
+        <Form form={form} layout="vertical">
           <Form.Item name="username" label="نام کاربری" rules={[{ required: true }]}>
-            <Input placeholder="نام کاربری" />
+            <Input />
           </Form.Item>
-          <Form.Item name="email" label="ایمیل" rules={[{ required: true, type: 'email' }]}>
-            <Input placeholder="ایمیل" />
+          <Form.Item name="displayName" label="نام و نام خانوادگی" rules={[{ required: true }]}>
+            <Input />
           </Form.Item>
-          {!editingUser && (
-            <Form.Item name="password" label="رمز عبور" rules={[{ required: true, min: 6 }]}>
-              <Input.Password placeholder="رمز عبور" />
+          <Form.Item name="email" label="ایمیل">
+            <Input />
+          </Form.Item>
+          {!editing && (
+            <Form.Item name="password" label="رمز عبور" rules={[{ required: true }]}>
+              <Input.Password />
             </Form.Item>
           )}
-          <Form.Item name="personnelNumber" label="شماره پرسنلی">
-            <Input placeholder="شماره پرسنلی" />
+          <Form.Item name="positionId" label="پست سازمانی">
+            <Select options={positions.map(p => ({ value: p.id, label: p.title }))} allowClear />
           </Form.Item>
-          <Form.Item name="nationalId" label="کدملی">
-            <Input placeholder="کدملی" maxLength={10} />
+          <Form.Item name="isActive" label="وضعیت" initialValue={true}>
+            <Select options={[{ value: true, label: 'فعال' }, { value: false, label: 'غیرفعال' }]} />
           </Form.Item>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button onClick={() => setModalOpen(false)}>انصراف</Button>
-            <Button type="primary" htmlType="submit">ذخیره</Button>
-          </div>
         </Form>
       </Modal>
     </div>

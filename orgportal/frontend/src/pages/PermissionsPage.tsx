@@ -1,95 +1,80 @@
-import { useState, useEffect } from 'react'
-import { Card, Input, Button, Select, message, Tree } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
-import { getUsers } from '../api/users'
-import { getUserPermissionTree } from '../api/users'
-import { setPermissionOverride, removePermissionOverride } from '../api/permissions'
-import type { User, PermissionTree } from '../types'
+import { useEffect, useState } from 'react'
+import { Select, Card, Tree, Tag, Space, message, Button } from 'antd'
+import { getUsers, getUserPermissions, updateUserOverrides } from '../api/users'
+import { getPermissionTree } from '../api/permissions'
 
 export default function PermissionsPage() {
-  const [users, setUsers] = useState<User[]>([])
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
-  const [permTree, setPermTree] = useState<PermissionTree[]>([])
-  const [search, setSearch] = useState('')
+  const [users, setUsers] = useState<any[]>([])
+  const [selectedUser, setSelectedUser] = useState<number | null>(null)
+  const [permTree, setPermTree] = useState<any[]>([])
+  const [effectivePerms, setEffectivePerms] = useState<string[]>([])
+  const [grantedKeys, setGrantedKeys] = useState<any[]>([])
+  const [deniedKeys, setDeniedKeys] = useState<any[]>([])
+  const [allPermIds, setAllPermIds] = useState<number[]>([])
 
-  useEffect(() => { getUsers().then(setUsers) }, [])
+  useEffect(() => {
+    getUsers().then(setUsers)
+    getPermissionTree().then(tree => {
+      const buildTree = (apps: any[]): any[] =>
+        apps.map(app => ({
+          title: app.name, key: `app-${app.id}`,
+          children: (app.modules || []).map((mod: any) => ({
+            title: mod.name, key: `mod-${mod.name}`,
+            children: (mod.permissions || []).map((p: any) => ({ title: `${p.action} (${p.name})`, key: `perm-${p.id}`, isLeaf: true }))
+          }))
+        }))
+      setPermTree(buildTree(tree))
+      const ids: number[] = []
+      tree.forEach((a: any) => a.modules?.forEach((m: any) => m.permissions?.forEach((p: any) => ids.push(p.id)))
+      )
+      setAllPermIds(ids)
+    })
+  }, [])
 
-  const loadPerms = async (userId: number) => {
-    setSelectedUserId(userId)
-    setPermTree(await getUserPermissionTree(userId))
+  const loadUserPerms = async (userId: number) => {
+    const data = await getUserPermissions(userId)
+    setEffectivePerms(data.effectivePermissions || [])
+    setGrantedKeys((data.grantedOverrides || []).map((p: any) => `perm-${p.id}`))
+    setDeniedKeys((data.deniedOverrides || []).map((p: any) => `perm-${p.id}`))
   }
 
-  const treeData = permTree
-    .filter(app => !search || app.appName.includes(search) || app.modules.some(m => m.module.includes(search)))
-    .map(app => ({
-      title: <span style={{ fontWeight: 700, color: '#3b5bdb' }}>{app.appName}</span>,
-      key: `app-${app.appCode}`,
-      children: app.modules.map(mod => ({
-        title: <span style={{ fontWeight: 600 }}>{mod.module}</span>,
-        key: `mod-${app.appCode}-${mod.module}`,
-        children: mod.actions.map(action => ({
-          title: (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, color: action.isGranted ? '#16a34a' : '#718096' }}>
-                {action.action}
-              </span>
-              <span style={{ fontSize: 11, color: '#718096', fontFamily: 'monospace' }}>{action.fullName}</span>
-              {action.isGranted && (
-                <Button size="small" danger style={{ fontSize: 11, height: 20, lineHeight: 1 }}
-                  onClick={() => selectedUserId && removePermissionOverride(selectedUserId, action.id).then(() => { message.success('حذف شد'); loadPerms(selectedUserId) })}>
-                  لغو
-                </Button>
-              )}
-              {!action.isGranted && (
-                <Button size="small" type="link" style={{ fontSize: 11, height: 20, lineHeight: 1 }}
-                  onClick={() => selectedUserId && setPermissionOverride(selectedUserId, action.id, true).then(() => { message.success('اعطا شد'); loadPerms(selectedUserId) })}>
-                  اعطا
-                </Button>
-              )}
-            </div>
-          ),
-          key: `perm-${action.id}`,
-        }))
-      }))
-    }))
+  const onUserChange = (id: number) => { setSelectedUser(id); loadUserPerms(id) }
+
+  const saveOverrides = async () => {
+    if (!selectedUser) return
+    const granted = grantedKeys.filter((k: string) => k.startsWith('perm-')).map((k: string) => parseInt(k.replace('perm-', '')))
+    const denied = deniedKeys.filter((k: string) => k.startsWith('perm-')).map((k: string) => parseInt(k.replace('perm-', '')))
+    await updateUserOverrides(selectedUser, { grantedPermissionIds: granted, deniedPermissionIds: denied })
+    message.success('ذخیره شد')
+    loadUserPerms(selectedUser)
+  }
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 18, fontWeight: 700 }}>مدیریت دسترسی‌ها</div>
-        <div style={{ color: '#718096', fontSize: 13 }}>مشاهده و ویرایش دسترسی‌های کاربران</div>
-      </div>
-
-      <Card bordered={false} style={{ borderRadius: 14, marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Select
-            style={{ width: 300 }}
-            placeholder="انتخاب کاربر..."
-            showSearch
-            optionFilterProp="label"
-            options={users.map(u => ({ value: u.id, label: `${u.fullName} (${u.personnelNumber || u.username})` }))}
-            onChange={loadPerms}
-          />
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="جستجو در دسترسی‌ها..."
-            style={{ width: 250, borderRadius: 10 }}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+      <h2 style={{ fontWeight: 700, marginBottom: 16 }}>مدیریت دسترسی‌های کاربر</h2>
+      <Select
+        style={{ width: 300, marginBottom: 24 }}
+        placeholder="انتخاب کاربر"
+        options={users.map(u => ({ value: u.id, label: u.displayName || u.username }))}
+        onChange={onUserChange}
+      />
+      {selectedUser && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+          <Card title="دسترسی‌های اعطاشده (Override)">
+            <Tree checkable treeData={permTree} checkedKeys={grantedKeys} onCheck={setGrantedKeys} defaultExpandAll />
+          </Card>
+          <Card title="دسترسی‌های مسدودشده (Override)">
+            <Tree checkable treeData={permTree} checkedKeys={deniedKeys} onCheck={setDeniedKeys} defaultExpandAll />
+          </Card>
+          <Card title="دسترسی‌های مؤثر (نهایی)">
+            <Space wrap>
+              {effectivePerms.map(p => <Tag key={p} color="blue">{p}</Tag>)}
+            </Space>
+          </Card>
         </div>
-      </Card>
-
-      {permTree.length > 0 && (
-        <Card bordered={false} style={{ borderRadius: 14 }}>
-          <Tree treeData={treeData} defaultExpandAll showLine={{ showLeafIcon: false }} />
-        </Card>
       )}
-
-      {selectedUserId && permTree.length === 0 && (
-        <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', padding: 40, color: '#718096' }}>
-          هیچ دسترسی برای این کاربر تعریف نشده
-        </Card>
+      {selectedUser && (
+        <Button type="primary" style={{ marginTop: 16 }} onClick={saveOverrides}>ذخیره تغییرات</Button>
       )}
     </div>
   )
